@@ -33,7 +33,7 @@
 // ***************************************************************************
 // ***************************************************************************
 
-// A simple asymetric memory. The write and read memory space must have the same size.
+// A simple asymmetric memory. The write and read memory space must have the same size.
 // 2^A_ADDRESS_WIDTH * A_DATA_WIDTH == 2^B_ADDRESS_WIDTH * B_DATA_WIDTH
 
 `timescale 1ns/100ps
@@ -45,15 +45,14 @@ module ad_mem_asym #(
   parameter   B_ADDRESS_WIDTH =   10,
   parameter   B_DATA_WIDTH =  64) (
 
-  input                   clka,
-  input                   wea,
-  input       [A_ADDRESS_WIDTH-1:0]  addra,
-  input       [A_DATA_WIDTH-1:0]  dina,
+  input                             clka,
+  input                             wea,
+  input       [A_ADDRESS_WIDTH-1:0] addra,
+  input       [A_DATA_WIDTH-1:0]    dina,
 
-  input                   clkb,
-  input       [B_ADDRESS_WIDTH-1:0]  addrb,
-  output  reg [B_DATA_WIDTH-1:0]  doutb);
-
+  input                             clkb,
+  input       [B_ADDRESS_WIDTH-1:0] addrb,
+  output  reg [B_DATA_WIDTH-1:0]    doutb);
 
   localparam  MEM_ADDRESS_WIDTH = (A_ADDRESS_WIDTH > B_ADDRESS_WIDTH) ? A_ADDRESS_WIDTH : B_ADDRESS_WIDTH;
   localparam  MEM_DATA_WIDTH = (A_DATA_WIDTH > B_DATA_WIDTH) ? B_DATA_WIDTH : A_DATA_WIDTH;
