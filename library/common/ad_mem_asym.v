@@ -51,6 +51,7 @@ module ad_mem_asym #(
   input       [A_DATA_WIDTH-1:0]    dina,
 
   input                             clkb,
+  input                             reb,
   input       [B_ADDRESS_WIDTH-1:0] addrb,
   output  reg [B_DATA_WIDTH-1:0]    doutb);
 
@@ -117,39 +118,47 @@ module ad_mem_asym #(
 
   generate if ((MEM_IO_COMP == 1) || (MEM_RATIO == 1)) begin
     always @(posedge clkb) begin
-      doutb <= m_ram[addrb];
+      if (reb == 1'b1) begin
+        doutb <= m_ram[addrb];
+      end
     end
   end
   endgenerate
 
   generate if ((MEM_IO_COMP == 0) && (MEM_RATIO == 2)) begin
     always @(posedge clkb) begin
-      doutb <= {m_ram[{addrb, 1'd1}],
-                m_ram[{addrb, 1'd0}]};
+      if (reb == 1'b1) begin
+        doutb <= {m_ram[{addrb, 1'd1}],
+                  m_ram[{addrb, 1'd0}]};
+      end
     end
   end
   endgenerate
 
   generate if ((MEM_IO_COMP == 0) && (MEM_RATIO == 4)) begin
     always @(posedge clkb) begin
-      doutb <= {m_ram[{addrb, 2'd3}],
-                m_ram[{addrb, 2'd2}],
-                m_ram[{addrb, 2'd1}],
-                m_ram[{addrb, 2'd0}]};
+      if (reb == 1'b1) begin
+        doutb <= {m_ram[{addrb, 2'd3}],
+                  m_ram[{addrb, 2'd2}],
+                  m_ram[{addrb, 2'd1}],
+                  m_ram[{addrb, 2'd0}]};
+      end
     end
   end
   endgenerate
 
   generate if ((MEM_IO_COMP == 0) && (MEM_RATIO == 8)) begin
     always @(posedge clkb) begin
-      doutb <= {m_ram[{addrb, 3'd7}],
-                m_ram[{addrb, 3'd6}],
-                m_ram[{addrb, 3'd5}],
-                m_ram[{addrb, 3'd4}],
-                m_ram[{addrb, 3'd3}],
-                m_ram[{addrb, 3'd2}],
-                m_ram[{addrb, 3'd1}],
-                m_ram[{addrb, 3'd0}]};
+      if (reb == 1'b1) begin
+        doutb <= {m_ram[{addrb, 3'd7}],
+                  m_ram[{addrb, 3'd6}],
+                  m_ram[{addrb, 3'd5}],
+                  m_ram[{addrb, 3'd4}],
+                  m_ram[{addrb, 3'd3}],
+                  m_ram[{addrb, 3'd2}],
+                  m_ram[{addrb, 3'd1}],
+                  m_ram[{addrb, 3'd0}]};
+      end
     end
   end
   endgenerate

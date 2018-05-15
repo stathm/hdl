@@ -198,6 +198,7 @@ module axi_adcfifo_dma #(
     .addra (axi_waddr),
     .dina (axi_ddata),
     .clkb (dma_clk),
+    .reb (1'b1),
     .addrb (dma_raddr),
     .doutb (dma_rdata_s));
 
