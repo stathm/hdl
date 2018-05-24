@@ -69,6 +69,7 @@ module dmac_dest_mm_axi #(
   output                              fifo_ready,
   input [DMA_DATA_WIDTH-1:0]        fifo_data,
   input                               fifo_last,
+  input [(DMA_DATA_WIDTH/8)-1:0]      fifo_strb,
 
   // Write address
   input                               m_axi_awready,
@@ -133,8 +134,7 @@ assign m_axi_wvalid = fifo_valid;
 assign fifo_ready = m_axi_wready;
 assign m_axi_wlast = fifo_last;
 assign m_axi_wdata = fifo_data;
-
-assign m_axi_wstrb = {(DMA_DATA_WIDTH/8){1'b1}};
+assign m_axi_wstrb = fifo_strb;
 
 dmac_response_handler #(
   .ID_WIDTH(ID_WIDTH)

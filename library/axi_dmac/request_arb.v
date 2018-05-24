@@ -231,10 +231,12 @@ wire dest_valid;
 wire dest_ready;
 wire [DMA_DATA_WIDTH_DEST-1:0] dest_data;
 wire dest_last;
+wire [DMA_DATA_WIDTH_DEST/8-1:0] dest_strb;
 wire dest_fifo_valid;
 wire dest_fifo_ready;
 wire [DMA_DATA_WIDTH_DEST-1:0] dest_fifo_data;
 wire dest_fifo_last;
+wire [DMA_DATA_WIDTH_DEST/8-1:0] dest_fifo_strb;
 
 wire src_req_valid;
 wire src_req_ready;
@@ -277,6 +279,8 @@ assign dbg_dest_request_id = dest_request_id;
 assign dbg_dest_response_id = dest_response_id;
 assign dbg_src_request_id = src_request_id;
 assign dbg_src_response_id = src_response_id;
+
+wire [BYTES_PER_BURST_WIDTH-1:0] req_length_aligned;
 
 always @(posedge req_clk)
 begin
@@ -342,6 +346,7 @@ dmac_dest_mm_axi #(
   .fifo_ready(dest_ready),
   .fifo_data(dest_data),
   .fifo_last(dest_last),
+  .fifo_strb(dest_strb),
 
   .m_axi_awready(m_axi_awready),
   .m_axi_awvalid(m_axi_awvalid),
@@ -787,6 +792,7 @@ axi_dmac_burst_memory #(
   .dest_data_ready(dest_fifo_ready),
   .dest_data(dest_fifo_data),
   .dest_data_last(dest_fifo_last),
+  .dest_data_strb(dest_fifo_strb),
 
   .dest_request_id(dest_request_id),
   .dest_data_request_id(dest_data_request_id),
@@ -794,7 +800,7 @@ axi_dmac_burst_memory #(
 );
 
 axi_register_slice #(
-  .DATA_WIDTH(DMA_DATA_WIDTH_DEST + 1),
+  .DATA_WIDTH(DMA_DATA_WIDTH_DEST + 1 + DMA_DATA_WIDTH_DEST / 8),
   .FORWARD_REGISTERED(AXI_SLICE_DEST),
   .BACKWARD_REGISTERED(AXI_SLICE_DEST)
 ) i_dest_slice (
@@ -803,16 +809,22 @@ axi_register_slice #(
   .s_axi_valid(dest_fifo_valid),
   .s_axi_ready(dest_fifo_ready),
   .s_axi_data({
+    dest_fifo_strb,
     dest_fifo_last,
     dest_fifo_data
   }),
   .m_axi_valid(dest_valid),
   .m_axi_ready(dest_ready),
   .m_axi_data({
+    dest_strb,
     dest_last,
     dest_data
   })
 );
+
+assign req_length_aligned = BYTES_PER_BEAT_WIDTH_DEST < BYTES_PER_BEAT_WIDTH_SRC ?
+  {req_length[BYTES_PER_BURST_WIDTH-1:BYTES_PER_BEAT_WIDTH_SRC],{BYTES_PER_BEAT_WIDTH_SRC{1'b1}}} :
+  {req_length[BYTES_PER_BURST_WIDTH-1:BYTES_PER_BEAT_WIDTH_DEST],{BYTES_PER_BEAT_WIDTH_DEST{1'b1}}};
 
 splitter #(
   .NUM_M(3)
@@ -845,7 +857,7 @@ util_axis_fifo #(
   .s_axis_empty(),
   .s_axis_data({
     req_dest_address,
-    req_length[BYTES_PER_BURST_WIDTH-1:BYTES_PER_BEAT_WIDTH_DEST],
+    req_length_aligned[BYTES_PER_BURST_WIDTH-1:BYTES_PER_BEAT_WIDTH_DEST],
     req_xlast
   }),
   .s_axis_room(),
@@ -874,7 +886,7 @@ util_axis_fifo #(
   .s_axis_empty(),
   .s_axis_data({
     req_src_address,
-    req_length[BYTES_PER_BURST_WIDTH-1:BYTES_PER_BEAT_WIDTH_SRC],
+    req_length_aligned[BYTES_PER_BURST_WIDTH-1:BYTES_PER_BEAT_WIDTH_SRC],
     req_sync_transfer_start,
     req_xlast
   }),

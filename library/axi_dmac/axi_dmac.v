@@ -276,10 +276,16 @@ localparam REAL_MAX_BYTES_PER_BURST =
   BYTES_PER_BURST_LIMIT < MAX_BYTES_PER_BURST ?
     BYTES_PER_BURST_LIMIT : MAX_BYTES_PER_BURST;
 
-/* Align to the length to the wider interface */
+/* MM has no alignment requirements */
+localparam DMA_LENGTH_ALIGN_SRC =
+  DMA_TYPE_SRC == DMA_TYPE_AXI_MM ? 0 : BYTES_PER_BEAT_WIDTH_SRC;
+localparam DMA_LENGTH_ALIGN_DEST =
+  DMA_TYPE_DEST == DMA_TYPE_AXI_MM ? 0 : BYTES_PER_BEAT_WIDTH_DEST;
+
+/* Choose the larger of the two */
 localparam DMA_LENGTH_ALIGN =
-  BYTES_PER_BEAT_WIDTH_DEST < BYTES_PER_BEAT_WIDTH_SRC ?
-    BYTES_PER_BEAT_WIDTH_SRC : BYTES_PER_BEAT_WIDTH_DEST;
+  DMA_LENGTH_ALIGN_SRC < DMA_LENGTH_ALIGN_DEST ?
+    DMA_LENGTH_ALIGN_DEST : DMA_LENGTH_ALIGN_SRC;
 
 // ID signals from the DMAC, just for debugging
 wire [ID_WIDTH-1:0] dest_request_id;

@@ -66,14 +66,19 @@ end else begin
   reg valid = 1'b0;
   reg last = 1'b0;
   reg [DATA_WIDTH_MEM-1:0] data = 'h0;
+  reg [DATA_WIDTH_MEM/8-1:0] strb = {DATA_WIDTH_MEM/8{1'b1}};
 
   always @(posedge clk) begin
     if (reset == 1'b1) begin
       valid <= 1'b0;
       mask <= 'h1;
     end else if (src_data_valid == 1'b1) begin
-      valid <= mask[RATIO-1];
-      mask <= {mask[RATIO-2:0],mask[RATIO-1]};
+      valid <= mask[RATIO-1] | src_data_last;
+      if (src_data_last == 1'b1) begin
+        mask <= 'h1;
+      end else begin
+        mask <= {mask[RATIO-2:0],mask[RATIO-1]};
+      end
     end else begin
       valid <= 1'b0;
     end
@@ -88,6 +93,11 @@ end else begin
       end
     end
     last <= src_data_last;
+    if (mask[0] == 1'b1) begin
+      strb <= 1'b1;
+    end else begin
+      strb <= strb | mask;
+    end
   end
 
   assign mem_data_valid = valid;

@@ -56,6 +56,7 @@ module axi_dmac_burst_memory #(
   input dest_data_ready,
   output [DATA_WIDTH_DEST-1:0] dest_data,
   output dest_data_last,
+  output [DATA_WIDTH_DEST/8-1:0] dest_data_strb,
 
   output [ID_WIDTH-1:0] dest_request_id,
   input [ID_WIDTH-1:0] dest_data_request_id,
@@ -142,6 +143,7 @@ wire dest_burst_ready;
 wire dest_ready;
 wire [DATA_WIDTH-1:0] dest_mem_data;
 wire dest_mem_data_ready;
+wire [DATA_WIDTH/8-1:0] dest_mem_data_strb;
 
 `include "inc_id.h"
 
@@ -271,6 +273,41 @@ always @(posedge dest_clk) begin
   end
 end
 
+generate if (0) begin
+
+  wire [2:0] src_last_beat_bytes;
+  reg [2:0] dest_last_beat_bytes = 'h7;
+  reg [2:0] last_beat_len_mem[0:AUX_FIFO_SIZE-1];
+  reg [DATA_WIDTH/8-1:0] dest_strb = {DATA_WIDTH/8{1'b1}};
+
+  always @(posedge src_clk) begin
+  if (src_last_beat == 1'b1) begin
+      last_beat_len_mem[src_id_reduced] <= src_last_beat_bytes;
+    end
+  end
+
+  always @(posedge dest_clk) begin
+    if (dest_burst_valid == 1'b1 && dest_burst_ready == 1'b1) begin
+      dest_last_beat_bytes <= last_beat_len_mem[dest_id_reduced_next];
+    end
+  end
+
+  always @(posedge dest_clk) begin
+    if (dest_beat == 1'b1) begin
+      if (dest_last == 1'b1) begin
+        dest_strb <= (1 << (dest_last_beat_bytes+1)) - 1;
+      end else begin
+        dest_strb <= {DATA_WIDTH/8{1'b1}};
+      end
+    end
+  end
+
+  assign dest_mem_data_strb = dest_strb;
+
+end else begin
+  assign dest_mem_data_strb = {DATA_WIDTH/8{1'b1}};
+end endgenerate
+
 always @(posedge dest_clk) begin
   if (dest_burst_ready == 1'b1) begin
     dest_id <= dest_id_next;
@@ -327,11 +364,13 @@ axi_dmac_resize_dest #(
   .mem_data_valid (dest_mem_data_valid),
   .mem_data_ready (dest_mem_data_ready),
   .mem_data (dest_mem_data),
+  .mem_data_strb (dest_mem_data_strb),
   .mem_data_last (dest_mem_data_last),
 
   .dest_data_valid (dest_data_valid),
   .dest_data_ready (dest_data_ready),
   .dest_data (dest_data),
+  .dest_data_strb (dest_data_strb),
   .dest_data_last (dest_data_last)
 );
 
