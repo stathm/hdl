@@ -122,6 +122,7 @@ module ad_dds #(
         // phase to amplitude convertor
          ad_dds_2 #(
            .DDS_DW (DDS_DW),
+           .PHASE_DW (PHASE_DW),
            .DDS_TYPE (DDS_TYPE),
            .CORDIC_DW (CORDIC_DW),
            .CORDIC_PHASE_DW (CORDIC_PHASE_DW))
