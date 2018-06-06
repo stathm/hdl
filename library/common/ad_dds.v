@@ -54,16 +54,16 @@ module ad_dds #(
 
   // interface
 
-  input                                 clk,
-  input                                 rst,
-  input                                 dac_dds_format,
-  input                                 dac_data_sync,
-  input       [                  15:0]  tone_1_scale,
-  input       [                  15:0]  tone_2_scale,
-  input       [                  15:0]  tone_1_init_offset,
-  input       [                  15:0]  tone_2_init_offset,
-  input       [          PHASE_DW-1:0]  tone_1_freq_word,
-  input       [          PHASE_DW-1:0]  tone_2_freq_word,
+  input                               clk,
+  input                               rst,
+  input                               dac_dds_format,
+  input                               dac_data_sync,
+  input       [                15:0]  tone_1_scale,
+  input       [                15:0]  tone_2_scale,
+  input       [                15:0]  tone_1_init_offset,
+  input       [                15:0]  tone_2_init_offset,
+  input       [        PHASE_DW-1:0]  tone_1_freq_word,
+  input       [        PHASE_DW-1:0]  tone_2_freq_word,
   output  reg [DDS_DW*CLK_RATIO-1:0]  dac_dds_data
   );
 
