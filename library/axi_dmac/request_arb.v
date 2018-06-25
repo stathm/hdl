@@ -215,9 +215,11 @@ wire req_gen_ready;
 wire req_dest_valid;
 wire req_dest_ready;
 wire req_dest_empty;
+wire dest_req_empty;
 wire req_src_valid;
 wire req_src_ready;
 wire req_src_empty;
+wire src_req_empty;
 
 wire dest_clk;
 wire dest_resetn;
@@ -229,7 +231,8 @@ wire dest_req_xlast;
 
 wire dest_response_valid;
 wire dest_response_ready;
-wire dest_response_empty;
+wire req_dest_response_empty;
+wire req_enabled_dest;
 wire [1:0] dest_response_resp;
 wire dest_response_resp_eot;
 
@@ -274,7 +277,7 @@ wire [DMA_DATA_WIDTH_SRC-1:0] src_fifo_data;
 wire src_fifo_repacked_valid;
 wire src_fifo_repacked_ready;
 wire [DMA_DATA_WIDTH-1:0] src_fifo_repacked_data;
-wire src_fifo_empty;
+wire dest_fifo_empty;
 
 wire fifo_empty;
 
@@ -859,16 +862,18 @@ util_axis_resize #(
 );
 
 util_axis_fifo #(
-  .DATA_WIDTH(DMA_DATA_WIDTH),
-  .ADDRESS_WIDTH($clog2(MAX_BYTES_PER_BURST / (DMA_DATA_WIDTH / 8) * FIFO_SIZE)),
-  .ASYNC_CLK(ASYNC_CLK_SRC_DEST)
+  .WR_DATA_WIDTH (DMA_DATA_WIDTH),
+  .WR_ADDRESS_WIDTH ($clog2(MAX_BYTES_PER_BURST / (DMA_DATA_WIDTH / 8) * FIFO_SIZE)),
+  .RD_DATA_WIDTH (DMA_DATA_WIDTH),
+  .RD_ADDRESS_WIDTH ($clog2(MAX_BYTES_PER_BURST / (DMA_DATA_WIDTH / 8) * FIFO_SIZE)),
+  .ASYNC_CLK (ASYNC_CLK_SRC_DEST)
 ) i_fifo (
   .s_axis_aclk(src_clk),
   .s_axis_aresetn(src_resetn),
   .s_axis_valid(src_fifo_repacked_valid),
   .s_axis_ready(src_fifo_repacked_ready),
   .s_axis_data(src_fifo_repacked_data),
-  .s_axis_empty(src_fifo_empty),
+  .s_axis_full(),
   .s_axis_room(),
 
   .m_axis_aclk(dest_clk),
@@ -876,6 +881,7 @@ util_axis_fifo #(
   .m_axis_valid(dest_fifo_valid),
   .m_axis_ready(dest_fifo_ready),
   .m_axis_data(dest_fifo_data),
+  .m_axis_empty (dest_fifo_empty),
   .m_axis_level()
 );
 
@@ -966,15 +972,17 @@ splitter #(
 );
 
 util_axis_fifo #(
-  .DATA_WIDTH(DMA_ADDRESS_WIDTH_DEST + BEATS_PER_BURST_WIDTH_DEST + 1),
-  .ADDRESS_WIDTH(0),
-  .ASYNC_CLK(ASYNC_CLK_DEST_REQ)
+  .WR_DATA_WIDTH (DMA_ADDRESS_WIDTH_DEST + BEATS_PER_BURST_WIDTH_DEST + 1),
+  .WR_ADDRESS_WIDTH (0),
+  .RD_DATA_WIDTH (DMA_ADDRESS_WIDTH_DEST + BEATS_PER_BURST_WIDTH_DEST + 1),
+  .RD_ADDRESS_WIDTH (0),
+  .ASYNC_CLK (ASYNC_CLK_DEST_REQ)
 ) i_dest_req_fifo (
   .s_axis_aclk(req_aclk),
   .s_axis_aresetn(req_aresetn),
   .s_axis_valid(req_dest_valid),
   .s_axis_ready(req_dest_ready),
-  .s_axis_empty(req_dest_empty),
+  .s_axis_full(),
   .s_axis_data({
     req_dest_address,
     req_length[BYTES_PER_BURST_WIDTH-1:BYTES_PER_BEAT_WIDTH_DEST],
@@ -991,19 +999,22 @@ util_axis_fifo #(
     dest_req_last_burst_length,
     dest_req_xlast
   }),
+  .m_axis_empty (dest_req_empty),
   .m_axis_level()
 );
 
 util_axis_fifo #(
-  .DATA_WIDTH(DMA_ADDRESS_WIDTH_SRC + BEATS_PER_BURST_WIDTH_SRC + 2),
-  .ADDRESS_WIDTH(0),
-  .ASYNC_CLK(ASYNC_CLK_REQ_SRC)
+  .WR_DATA_WIDTH (DMA_ADDRESS_WIDTH_SRC + BEATS_PER_BURST_WIDTH_SRC + 2),
+  .WR_ADDRESS_WIDTH (0),
+  .RD_DATA_WIDTH (DMA_ADDRESS_WIDTH_SRC + BEATS_PER_BURST_WIDTH_SRC + 2),
+  .RD_ADDRESS_WIDTH (0),
+  .ASYNC_CLK (ASYNC_CLK_REQ_SRC)
 ) i_src_req_fifo (
   .s_axis_aclk(req_aclk),
   .s_axis_aresetn(req_aresetn),
   .s_axis_valid(req_src_valid),
   .s_axis_ready(req_src_ready),
-  .s_axis_empty(req_src_empty),
+  .s_axis_full(),
   .s_axis_data({
     req_src_address,
     req_length[BYTES_PER_BURST_WIDTH-1:BYTES_PER_BEAT_WIDTH_SRC],
@@ -1022,19 +1033,22 @@ util_axis_fifo #(
     src_req_sync_transfer_start,
     src_req_xlast
   }),
+  .m_axis_empty(src_req_empty),
   .m_axis_level()
 );
 
 util_axis_fifo #(
-  .DATA_WIDTH(1),
-  .ADDRESS_WIDTH(0),
-  .ASYNC_CLK(ASYNC_CLK_DEST_REQ)
+  .WR_DATA_WIDTH (1),
+  .WR_ADDRESS_WIDTH (0),
+  .RD_DATA_WIDTH (1),
+  .RD_ADDRESS_WIDTH (0),
+  .ASYNC_CLK (ASYNC_CLK_DEST_REQ)
 ) i_dest_response_fifo (
   .s_axis_aclk(dest_clk),
   .s_axis_aresetn(dest_resetn),
   .s_axis_valid(dest_response_valid),
   .s_axis_ready(dest_response_ready),
-  .s_axis_empty(dest_response_empty),
+  .s_axis_full(),
   .s_axis_data(dest_response_resp_eot),
   .s_axis_room(),
 
@@ -1043,6 +1057,7 @@ util_axis_fifo #(
   .m_axis_valid(response_dest_valid),
   .m_axis_ready(response_dest_ready),
   .m_axis_data(response_dest_resp_eot),
+  .m_axis_empty(req_dest_response_empty),
   .m_axis_level()
 );
 
@@ -1104,9 +1119,10 @@ sync_bits #(
 ) i_sync_status_dest (
   .out_clk(req_aclk),
   .out_resetn(req_aresetn),
-  .in({dest_enabled | ~dest_response_empty, dest_sync_id_ret}),
-  .out({enabled_dest, sync_id_ret_dest})
+  .in({dest_enabled, dest_sync_id_ret}),
+  .out({req_enabled_dest, sync_id_ret_dest})
 );
+assign enabled_dest = req_enabled_dest | ~req_dest_response_empty;
 
 sync_bits #(
   .NUM_OF_BITS(2),
@@ -1119,13 +1135,13 @@ sync_bits #(
 );
 
 sync_bits #(
-  .NUM_OF_BITS(3),
+  .NUM_OF_BITS(5),
   .ASYNC_CLK(ASYNC_CLK_REQ_SRC)
 ) i_sync_status_src (
   .out_clk(req_aclk),
   .out_resetn(req_aresetn),
-  .in({src_enabled /* | ~src_response_empty*/, src_sync_id_ret, src_fifo_empty}),
-  .out({enabled_src, sync_id_ret_src, fifo_empty})
+  .in({src_enabled /* | ~src_response_empty*/, src_sync_id_ret, dest_fifo_empty, dest_req_empty, src_req_empty}),
+  .out({enabled_src, sync_id_ret_src, fifo_empty, req_dest_empty,  req_src_empty})
 );
 
 endmodule
