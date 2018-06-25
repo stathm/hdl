@@ -41,11 +41,9 @@ XILINX_LIB_DEPS += util_axis_resize
 XILINX_LIB_DEPS += util_cdc
 
 ALTERA_DEPS += ../common/ad_mem.v
-ALTERA_DEPS += ../util_axis_fifo/address_gray.v
-ALTERA_DEPS += ../util_axis_fifo/address_gray_pipelined.v
-ALTERA_DEPS += ../util_axis_fifo/address_sync.v
+ALTERA_DEPS += ../common/ad_mem_asym.v
+ALTERA_DEPS += ../util_axis_fifo/address_generator.v
 ALTERA_DEPS += ../util_axis_fifo/util_axis_fifo.v
-ALTERA_DEPS += ../util_axis_resize/util_axis_resize.v
 ALTERA_DEPS += ../util_cdc/sync_bits.v
 ALTERA_DEPS += ../util_cdc/sync_gray.v
 ALTERA_DEPS += axi_dmac_constr.sdc
