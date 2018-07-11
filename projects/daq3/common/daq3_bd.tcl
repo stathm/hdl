@@ -94,20 +94,23 @@ ad_connect  axi_ad9152_core/dac_valid_0 axi_ad9152_upack/dac_valid_0
 ad_connect  axi_ad9152_core/dac_enable_1 axi_ad9152_upack/dac_enable_1
 ad_connect  axi_ad9152_core/dac_ddata_1 axi_ad9152_upack/dac_data_1
 ad_connect  axi_ad9152_core/dac_valid_1 axi_ad9152_upack/dac_valid_1
-ad_connect  util_daq3_xcvr/tx_out_clk_0 axi_ad9152_fifo/dac_clk
-ad_connect  axi_ad9152_jesd_rstgen/peripheral_reset axi_ad9152_fifo/dac_rst
-ad_connect  axi_ad9152_upack/dac_valid axi_ad9152_fifo/dac_valid
-ad_connect  axi_ad9152_upack/dac_data axi_ad9152_fifo/dac_data
-ad_connect  axi_ad9152_core/dac_dunf axi_ad9152_fifo/dac_dunf
-ad_connect  sys_cpu_clk axi_ad9152_fifo/dma_clk
-ad_connect  sys_cpu_reset axi_ad9152_fifo/dma_rst
-ad_connect  sys_cpu_clk axi_ad9152_dma/m_axis_aclk
-ad_connect  sys_cpu_resetn axi_ad9152_dma/m_src_axi_aresetn
-ad_connect  axi_ad9152_fifo/dma_xfer_req axi_ad9152_dma/m_axis_xfer_req
-ad_connect  axi_ad9152_fifo/dma_ready axi_ad9152_dma/m_axis_ready
-ad_connect  axi_ad9152_fifo/dma_data axi_ad9152_dma/m_axis_data
-ad_connect  axi_ad9152_fifo/dma_valid axi_ad9152_dma/m_axis_valid
-ad_connect  axi_ad9152_fifo/dma_xfer_last axi_ad9152_dma/m_axis_last
+
+if {$sys_zynq == 0 || $sys_zynq == 1} {
+    ad_connect  util_daq3_xcvr/tx_out_clk_0 axi_ad9152_fifo/dac_clk
+    ad_connect  axi_ad9152_jesd_rstgen/peripheral_reset axi_ad9152_fifo/dac_rst
+    ad_connect  axi_ad9152_upack/dac_valid axi_ad9152_fifo/dac_valid
+    ad_connect  axi_ad9152_upack/dac_data axi_ad9152_fifo/dac_data
+    ad_connect  axi_ad9152_core/dac_dunf axi_ad9152_fifo/dac_dunf
+    ad_connect  sys_cpu_clk axi_ad9152_fifo/dma_clk
+    ad_connect  sys_cpu_reset axi_ad9152_fifo/dma_rst
+    ad_connect  sys_cpu_clk axi_ad9152_dma/m_axis_aclk
+    ad_connect  sys_cpu_resetn axi_ad9152_dma/m_src_axi_aresetn
+    ad_connect  axi_ad9152_fifo/dma_xfer_req axi_ad9152_dma/m_axis_xfer_req
+    ad_connect  axi_ad9152_fifo/dma_ready axi_ad9152_dma/m_axis_ready
+    ad_connect  axi_ad9152_fifo/dma_data axi_ad9152_dma/m_axis_data
+    ad_connect  axi_ad9152_fifo/dma_valid axi_ad9152_dma/m_axis_valid
+    ad_connect  axi_ad9152_fifo/dma_xfer_last axi_ad9152_dma/m_axis_last
+}
 
 # connections (adc)
 
@@ -123,18 +126,22 @@ ad_connect  axi_ad9680_core/adc_data_0 axi_ad9680_cpack/adc_data_0
 ad_connect  axi_ad9680_core/adc_enable_1 axi_ad9680_cpack/adc_enable_1
 ad_connect  axi_ad9680_core/adc_valid_1 axi_ad9680_cpack/adc_valid_1
 ad_connect  axi_ad9680_core/adc_data_1 axi_ad9680_cpack/adc_data_1
-ad_connect  util_daq3_xcvr/rx_out_clk_0 axi_ad9680_fifo/adc_clk
-ad_connect  axi_ad9680_jesd_rstgen/peripheral_reset axi_ad9680_fifo/adc_rst
-ad_connect  axi_ad9680_cpack/adc_valid axi_ad9680_fifo/adc_wr
-ad_connect  axi_ad9680_cpack/adc_data axi_ad9680_fifo/adc_wdata
-ad_connect  sys_cpu_clk axi_ad9680_fifo/dma_clk
-ad_connect  sys_cpu_clk axi_ad9680_dma/s_axis_aclk
-ad_connect  sys_cpu_resetn axi_ad9680_dma/m_dest_axi_aresetn
-ad_connect  axi_ad9680_fifo/dma_wr axi_ad9680_dma/s_axis_valid
-ad_connect  axi_ad9680_fifo/dma_wdata axi_ad9680_dma/s_axis_data
-ad_connect  axi_ad9680_fifo/dma_wready axi_ad9680_dma/s_axis_ready
-ad_connect  axi_ad9680_fifo/dma_xfer_req axi_ad9680_dma/s_axis_xfer_req
-ad_connect  axi_ad9680_core/adc_dovf axi_ad9680_fifo/adc_wovf
+
+if {$sys_zynq == 0 || $sys_zynq == 1} {
+    ad_connect  util_daq3_xcvr/rx_out_clk_0 axi_ad9680_fifo/adc_clk
+    ad_connect  axi_ad9680_jesd_rstgen/peripheral_reset axi_ad9680_fifo/adc_rst
+    ad_connect  axi_ad9680_cpack/adc_valid axi_ad9680_fifo/adc_wr
+    ad_connect  axi_ad9680_cpack/adc_data axi_ad9680_fifo/adc_wdata
+    ad_connect  sys_cpu_clk axi_ad9680_fifo/dma_clk
+    ad_connect  sys_cpu_clk axi_ad9680_dma/s_axis_aclk
+    ad_connect  sys_cpu_resetn axi_ad9680_dma/m_dest_axi_aresetn
+    ad_connect  axi_ad9680_fifo/dma_wr axi_ad9680_dma/s_axis_valid
+    ad_connect  axi_ad9680_fifo/dma_wdata axi_ad9680_dma/s_axis_data
+    ad_connect  axi_ad9680_fifo/dma_wready axi_ad9680_dma/s_axis_ready
+    ad_connect  axi_ad9680_fifo/dma_xfer_req axi_ad9680_dma/s_axis_xfer_req
+    ad_connect  axi_ad9680_core/adc_dovf axi_ad9680_fifo/adc_wovf
+    ad_connect  axi_ad9152_fifo/bypass GND
+}
 
 # interconnect (cpu)
 
@@ -154,10 +161,12 @@ ad_mem_hp3_interconnect sys_cpu_clk axi_ad9680_xcvr/m_axi
 
 # interconnect (mem/dac)
 
-ad_mem_hp1_interconnect sys_cpu_clk sys_ps7/S_AXI_HP1
-ad_mem_hp1_interconnect sys_cpu_clk axi_ad9152_dma/m_src_axi
-ad_mem_hp2_interconnect sys_cpu_clk sys_ps7/S_AXI_HP2
-ad_mem_hp2_interconnect sys_cpu_clk axi_ad9680_dma/m_dest_axi
+if {$sys_zynq == 0 || $sys_zynq == 1} {
+    ad_mem_hp1_interconnect sys_cpu_clk sys_ps7/S_AXI_HP1
+    ad_mem_hp1_interconnect sys_cpu_clk axi_ad9152_dma/m_src_axi
+    ad_mem_hp2_interconnect sys_cpu_clk sys_ps7/S_AXI_HP2
+    ad_mem_hp2_interconnect sys_cpu_clk axi_ad9680_dma/m_dest_axi
+}
 
 # interrupts
 
@@ -165,6 +174,3 @@ ad_cpu_interrupt ps-10 mb-15 axi_ad9152_jesd/irq
 ad_cpu_interrupt ps-11 mb-14 axi_ad9680_jesd/irq
 ad_cpu_interrupt ps-12 mb-13 axi_ad9152_dma/irq
 ad_cpu_interrupt ps-13 mb-12 axi_ad9680_dma/irq
-
-ad_connect  axi_ad9152_fifo/bypass GND
-
